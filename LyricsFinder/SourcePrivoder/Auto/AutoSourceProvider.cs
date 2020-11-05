@@ -9,18 +9,20 @@ namespace LyricsFinder.SourcePrivoder.Auto
     [SourceProviderName("auto", "DarkProjector")]
     public class AutoSourceProvider : SourceProviderBase
     {
-        public SourceProviderBase[] search_engines;
+        public SourceProviderBase[] search_engines = new SourceProviderBase[0];
 
         private Dictionary<string, SourceProviderBase> cache_provider =new Dictionary<string, SourceProviderBase>();
 
-        public AutoSourceProvider()
-        {
-            search_engines=SourceProviderManager.LyricsSourceProvidersType
+        public static AutoSourceProvider FindDefaultImplsToCreate() => new AutoSourceProvider(SourceProviderManager.LyricsSourceProvidersTypes
                 .Select(x => x.GetCustomAttribute<SourceProviderNameAttribute>())
                 .OfType<SourceProviderNameAttribute>()
                 .Where(x => !x.Name.Equals("auto", StringComparison.InvariantCultureIgnoreCase))
                 .Select(x => SourceProviderManager.GetOrCreateSourceProvier(x.Name))
-                .ToArray();
+                .ToArray());
+
+        public AutoSourceProvider(SourceProviderBase[] other_source_providers)
+        {
+            search_engines = other_source_providers ?? Array.Empty<SourceProviderBase>();
         }
 
         public override Lyrics ProvideLyric(string artist, string title, int time, bool request_trans_lyrics)

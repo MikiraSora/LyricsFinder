@@ -12,7 +12,11 @@ namespace LyricsFinder
             var msg = (time ? "[" + DateTime.Now.ToLongTimeString() + "] " : string.Empty)
                + message
                + (new_line ? Environment.NewLine : string.Empty);
-            GlobalSetting.OutputFunc?.Invoke(msg);
+
+            if (GlobalSetting.OutputFunc != null)
+                GlobalSetting.OutputFunc(msg);
+            else
+                Console.Write(msg);
         }
 
         public static void Debug(string message, bool new_line = true, bool time = true)

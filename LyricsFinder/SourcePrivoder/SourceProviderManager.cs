@@ -7,8 +7,32 @@ namespace LyricsFinder.SourcePrivoder
 {
     public static class SourceProviderManager
     {
-        public static List<Type> LyricsSourceProvidersType { get; } = new List<Type>();
+        internal static HashSet<Type> LyricsSourceProvidersTypes { get; } = new HashSet<Type>();
+        private static readonly Type SourceProviderBaseType = typeof(SourceProviderBase);
         private static HashSet<(SourceProviderBase obj, string name)> cache_obj = new HashSet<(SourceProviderBase obj, string name)>();
+
+        public static void LoadDefaultProviders()
+        {
+            foreach (var item in typeof(SourceProviderManager).Assembly
+                .GetTypes()
+                .Where(x => x.GetCustomAttribute<SourceProviderNameAttribute>() != null)
+                .Where(x => x.IsSubclassOf(SourceProviderBaseType)))
+            {
+                AddSourceProvierType(item);
+            } 
+        }
+
+        public static void AddSourceProvierType(Type type)
+        {
+            if (LyricsSourceProvidersTypes.Contains(type))
+            {
+                Utils.Output($"source provider type {type.Name} had been loaded.");
+                return;
+            }
+
+            LyricsSourceProvidersTypes.Add(type);
+            Utils.Output($"loaded source provider type {type.Name} sucessfully.");
+        }
 
         public static SourceProviderBase GetOrCreateSourceProvier(string provider_name)
         {
@@ -17,7 +41,7 @@ namespace LyricsFinder.SourcePrivoder
             if (cache.obj!=null)
                 return cache.obj;
 
-            var provider = LyricsSourceProvidersType.FirstOrDefault(x => x.GetCustomAttribute<SourceProviderNameAttribute>()?.Name?.Equals(provider_name, StringComparison.InvariantCultureIgnoreCase)??false);
+            var provider = LyricsSourceProvidersTypes.FirstOrDefault(x => x.GetCustomAttribute<SourceProviderNameAttribute>()?.Name?.Equals(provider_name, StringComparison.InvariantCultureIgnoreCase)??false);
 
             if (provider!=null)
             {
