@@ -25,7 +25,7 @@ namespace LyricsFinder
             if (result.Any(x=>x.Item1.Equals(Sentence.Empty)))
                 return (Sentence.Empty, result.Min(x => x.Item2));
 
-            var ret = (result.Aggregate((z, x) => (z.Item1+x.Item1, 0)).Item1, result.Min(x => x.Item2));
+            var ret = (result.Aggregate((z, x) => (z.Item1 + x.Item1, 0)).Item1, result.Min(x => x.Item2));
 
             //trim newline in sentence content
             ret.Item1.Content=ret.Item1.Content.Trim('\n', '\r');
