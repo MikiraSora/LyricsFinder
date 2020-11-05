@@ -13,8 +13,6 @@ namespace LyricsFinder
 
     public abstract class SourceProviderBase<SEARCHRESULT, SEARCHER, DOWNLOADER, PARSER> : SourceProviderBase where DOWNLOADER : LyricDownloaderBase, new() where PARSER : LyricParserBase, new() where SEARCHER : SongSearchBase<SEARCHRESULT>, new() where SEARCHRESULT : SearchSongResultBase, new()
     {
-        public int DurationThresholdValue { get; set; } = 1000;
-
         public DOWNLOADER Downloader { get; } = new DOWNLOADER();
         public SEARCHER Seadrcher { get; } = new SEARCHER();
         public PARSER Parser { get; } = new PARSER();
@@ -27,24 +25,11 @@ namespace LyricsFinder
 
                 var lyrics = PickLyric(artist, title, time, search_result, request_trans_lyrics, out SEARCHRESULT picked_result);
 
-                if (lyrics!=null&&Setting.EnableOutputSearchResult)
-                {
-                    //output lyrics search result
-                    var content_obj = new { DateTime = DateTime.Now, picked_result.ID, picked_result.Artist, picked_result.Title, picked_result.Duration, Raw_Title = title, Raw_Artist = artist, Raw_Duration = time };
-                    string json = Newtonsoft.Json.JsonConvert.SerializeObject(content_obj, Newtonsoft.Json.Formatting.None);
-                    if (!Directory.Exists(@"..\lyric_cache"))
-                        Directory.CreateDirectory(@"..\lyric_cache");
-                    string file_path = $@"..\lyric_cache\{this.GetType().Name}.txt";
-                    File.AppendAllText(file_path, json+Environment.NewLine, Encoding.UTF8);
-
-                    Utils.Output($"-> 从{this.GetType().Name}获取到 {(lyrics.IsTranslatedLyrics ? "翻译歌词" : "原歌词")}", ConsoleColor.Green);
-                }
-
                 return lyrics;
             }
             catch (Exception e)
             {
-                Utils.Output($"{GetType().Name}获取歌词失败:{e.Message}", ConsoleColor.Red);
+                Utils.Output($"{GetType().Name}获取歌词失败:{e.Message}");
                 return null;
             }
         }
@@ -121,7 +106,7 @@ namespace LyricsFinder
 
         private static void DumpSearchList(string prefix, int time, List<SEARCHRESULT> search_list)
         {
-            if (Setting.DebugMode)
+            if (GlobalSetting.DebugMode)
                 foreach (var r in search_list)
                     Utils.Debug($"{prefix} music_id:{r.ID} artist:{r.Artist} title:{r.Title} time{r.Duration}({Math.Abs(r.Duration-time):F2})");
         }
@@ -129,12 +114,12 @@ namespace LyricsFinder
         public virtual void FuckSearchFilte(string artist, string title, int time, ref List<SEARCHRESULT> search_result)
         {
             //删除长度不对的
-            search_result.RemoveAll((r) => Math.Abs(r.Duration-time)>DurationThresholdValue);
+            search_result.RemoveAll((r) => Math.Abs(r.Duration-time) > GlobalSetting.DurationThresholdValue);
 
             string check_Str = $"{title.Trim()}".ToLower();
 
             //删除标题看起来不匹配的(超过1/3内容不对就出局),严格模式就要全匹配(防止 https://puu.sh/D0FCB/53ac51f034.png )
-            float threhold_length = Setting.StrictMatch?0:check_Str.Length*(1.0f/3);
+            float threhold_length = GlobalSetting.StrictMatch ? 0 : check_Str.Length*(1.0f/3);
 
             search_result.RemoveAll((r) =>
             {

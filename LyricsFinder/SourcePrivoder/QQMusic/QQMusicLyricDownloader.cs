@@ -19,7 +19,7 @@ namespace LyricsFinder.SourcePrivoder.QQMusic
 
             HttpWebRequest request = HttpWebRequest.CreateHttp(url);
 
-            request.Timeout=Setting.SearchAndDownloadTimeout;
+            request.Timeout=GlobalSetting.SearchAndDownloadTimeout;
             request.Referer="https://y.qq.com/portal/player.html";
             request.Headers.Add("Cookie", "skey=@LVJPZmJUX; p");
 

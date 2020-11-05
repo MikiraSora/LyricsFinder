@@ -5,31 +5,28 @@ using System.Text;
 
 namespace LyricsFinder
 {
-    public static class Utils
+    internal static class Utils
     {
-        private static void OutputToLocalConsole(string message, ConsoleColor color, bool new_line = true, bool time = true)
+        public static void Output(string message, bool new_line = true, bool time = true)
         {
-            Console.ForegroundColor=color;
-            Console.Write((time ? "["+DateTime.Now.ToLongTimeString()+"] " : string.Empty)
-               +message
-               +(new_line ? Environment.NewLine : string.Empty));
-            Console.ResetColor();
-        }
-
-        public static void Output(string message, ConsoleColor color, bool new_line = true, bool time = true)
-        {
-            OutputToLocalConsole(message, color, new_line, time);
+            var msg = (time ? "[" + DateTime.Now.ToLongTimeString() + "] " : string.Empty)
+               + message
+               + (new_line ? Environment.NewLine : string.Empty);
+            GlobalSetting.OutputFunc?.Invoke(msg);
         }
 
         public static void Debug(string message, bool new_line = true, bool time = true)
         {
-            if (Setting.DebugMode)
-                Output(message, ConsoleColor.Cyan, new_line, time);
+            if (GlobalSetting.DebugMode)
+                Output(message, new_line, time);
         }
 
         //https://www.programcreek.com/2013/12/edit-distance-in-java/
         public static int EditDistance(string a, string b)
         {
+            if (GlobalSetting.CustomCalculateStringDistanceFunc != null)
+                return GlobalSetting.CustomCalculateStringDistanceFunc(a, b);
+
             int len_a = a.Length;
             int len_b = b.Length;
 

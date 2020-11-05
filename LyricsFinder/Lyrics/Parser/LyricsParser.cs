@@ -56,7 +56,7 @@ namespace LyricsFinder
             }
             catch (Exception e)
             {
-                Utils.Output($"Parse lyrics content failed!"+e.Message, ConsoleColor.Red);
+                Utils.Output($"Parse lyrics content failed!"+e.Message);
                 return null;
             }
         }
