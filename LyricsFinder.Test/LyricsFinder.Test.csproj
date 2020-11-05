@@ -55,9 +55,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="TestResource\a.lrc" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="SourceProvider\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TestResource\KugouSourceProvider.txt" />
+    <Content Include="TestResource\NeteaseSourceProvider.txt" />
+    <Content Include="TestResource\QQMusicSourceProvider.txt" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
