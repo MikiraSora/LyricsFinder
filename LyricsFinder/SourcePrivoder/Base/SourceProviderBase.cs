@@ -2,12 +2,16 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 
 namespace LyricsFinder
 {
     public abstract class SourceProviderBase
     {
+        private string _providerName;
+        public string ProviderName => _providerName ?? (_providerName = this.GetType().GetCustomAttribute<SourceProviderNameAttribute>()?.Name ?? "unknown");
+
         public abstract Lyrics ProvideLyric(string artist, string title, int time, bool request_trans_lyrics);
     }
 
@@ -24,6 +28,8 @@ namespace LyricsFinder
                 var search_result = Seadrcher.Search(artist, title);
 
                 var lyrics = PickLyric(artist, title, time, search_result, request_trans_lyrics, out SEARCHRESULT picked_result);
+
+                lyrics.ProviderName = ProviderName;
 
                 return lyrics;
             }
@@ -61,7 +67,7 @@ namespace LyricsFinder
                 lyric_cont=Parser.Parse(content);
 
                 //过滤没有实质歌词内容的玩意,比如没有时间轴的歌词文本
-                if (lyric_cont?.LyricSentencs?.Count==0)
+                if (lyric_cont?.LyricsSentences?.Count==0)
                     continue;
 
                 Utils.Debug($"* Picked music_id:{result.ID} artist:{result.Artist} title:{result.Title}");

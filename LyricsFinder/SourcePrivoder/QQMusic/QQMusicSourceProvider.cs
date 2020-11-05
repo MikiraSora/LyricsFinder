@@ -14,14 +14,14 @@ namespace LyricsFinder.SourcePrivoder.QQMusic
 
             if (result!=null)
             {
-                switch (result.LyricSentencs.Count)
+                switch (result.LyricsSentences.Count)
                 {
                     case 0:
                         Utils.Debug($"{picked_result?.ID}:无任何歌词在里面,rej");
                         return null;
 
                     case 1:
-                        var first_sentence = result.LyricSentencs.First();
+                        var first_sentence = result.LyricsSentences.First();
                         if (first_sentence.StartTime<=0&&first_sentence.Content.Contains("纯音乐")&&first_sentence.Content.Contains("没有填词"))
                         {
                             Utils.Debug($"{picked_result?.ID}:纯音乐? : "+first_sentence);

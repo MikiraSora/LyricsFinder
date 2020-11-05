@@ -13,7 +13,7 @@ namespace LyricsFinder.Example
             var provider = AutoSourceProvider.FindDefaultImplsToCreate();
             var lyrics = provider.ProvideLyric("ゆある", "アスノヨゾラ哨戒班", 177000, false);
 
-            foreach (var item in lyrics.LyricSentencs)
+            foreach (var item in lyrics.LyricsSentences)
             {
                 Console.WriteLine(item.Content);
             }
