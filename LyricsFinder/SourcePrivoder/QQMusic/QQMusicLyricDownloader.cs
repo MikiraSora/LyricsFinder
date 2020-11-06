@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LyricsFinder.SourcePrivoder.QQMusic
 {
@@ -11,49 +12,49 @@ namespace LyricsFinder.SourcePrivoder.QQMusic
 
         public static readonly string NEW_API_URL = @"https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?g_tk=753738303&songmid={0}&callback=json&songtype={1}";
 
-        public override string DownloadLyric(SearchSongResultBase song, bool request_trans_lyrics)
+        public override async Task<string> DownloadLyricAsync(SearchSongResultBase song, bool request_trans_lyrics)
         {
-            string song_type = (song as Song)?.type??"0";
+            string song_type = (song as Song)?.type ?? "0";
 
             Uri url = new Uri(string.Format(NEW_API_URL, song.ID, song_type));
 
             HttpWebRequest request = HttpWebRequest.CreateHttp(url);
 
-            request.Timeout=GlobalSetting.SearchAndDownloadTimeout;
-            request.Referer="https://y.qq.com/portal/player.html";
+            request.Timeout = GlobalSetting.SearchAndDownloadTimeout;
+            request.Referer = "https://y.qq.com/portal/player.html";
             request.Headers.Add("Cookie", "skey=@LVJPZmJUX; p");
 
-            var response = request.GetResponse();
+            var response = await request.GetResponseAsync();
 
             string content = string.Empty;
 
             using (var reader = new StreamReader(response.GetResponseStream()))
             {
-                content=reader.ReadToEnd();
+                content = await reader.ReadToEndAsync();
             }
 
             if (content.StartsWith("json("))
             {
-                content=content.Remove(0, 5);
+                content = content.Remove(0, 5);
             }
 
             if (content.EndsWith(")"))
             {
-                content=content.Remove(content.Length-1);
+                content = content.Remove(content.Length - 1);
             }
 
-            content=System.Web.HttpUtility.HtmlDecode(content);
+            content = System.Web.HttpUtility.HtmlDecode(content);
             JObject json = JObject.Parse(content);
 
             int result = json["retcode"].ToObject<int>();
-            if (result<0)
+            if (result < 0)
                 return null;
 
-            content=json[request_trans_lyrics ? "trans" : "lyric"]?.ToString();
+            content = json[request_trans_lyrics ? "trans" : "lyric"]?.ToString();
             if (string.IsNullOrWhiteSpace(content))
                 return null;
 
-            content=Utils.Base64Decode(content);
+            content = Utils.Base64Decode(content);
 
             return content;
         }

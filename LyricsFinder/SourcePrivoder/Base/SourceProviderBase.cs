@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LyricsFinder
 {
@@ -12,7 +13,7 @@ namespace LyricsFinder
         private string _providerName;
         public string ProviderName => _providerName ?? (_providerName = this.GetType().GetCustomAttribute<SourceProviderNameAttribute>()?.Name ?? "unknown");
 
-        public abstract Lyrics ProvideLyric(string artist, string title, int time, bool request_trans_lyrics);
+        public abstract Task<Lyrics> ProvideLyricAsync(string artist, string title, int time, bool request_trans_lyrics);
     }
 
     public abstract class SourceProviderBase<SEARCHRESULT, SEARCHER, DOWNLOADER, PARSER> : SourceProviderBase where DOWNLOADER : LyricDownloaderBase, new() where PARSER : LyricParserBase, new() where SEARCHER : SongSearchBase<SEARCHRESULT>, new() where SEARCHRESULT : SearchSongResultBase, new()
@@ -21,15 +22,16 @@ namespace LyricsFinder
         public SEARCHER Seadrcher { get; } = new SEARCHER();
         public PARSER Parser { get; } = new PARSER();
 
-        public override Lyrics ProvideLyric(string artist, string title, int time, bool request_trans_lyrics)
+        public override async Task<Lyrics> ProvideLyricAsync(string artist, string title, int time, bool request_trans_lyrics)
         {
             try
             {
-                var search_result = Seadrcher.Search(artist, title);
+                var search_result = await Seadrcher.SearchAsync(artist, title);
 
-                var lyrics = PickLyric(artist, title, time, search_result, request_trans_lyrics, out SEARCHRESULT picked_result);
+                var (lyrics, picked_result) = await PickLyricAsync(artist, title, time, search_result, request_trans_lyrics);
 
-                lyrics.ProviderName = ProviderName;
+                if (lyrics != null)
+                    lyrics.ProviderName = ProviderName;
 
                 return lyrics;
             }
@@ -40,10 +42,8 @@ namespace LyricsFinder
             }
         }
 
-        public virtual Lyrics PickLyric(string artist, string title, int time, List<SEARCHRESULT> search_result, bool request_trans_lyrics, out SEARCHRESULT picked_result)
+        public virtual async Task<(Lyrics , SEARCHRESULT)> PickLyricAsync(string artist, string title, int time, List<SEARCHRESULT> search_result, bool request_trans_lyrics)
         {
-            picked_result=null;
-
             DumpSearchList("-", time, search_result);
 
             FuckSearchFilte(artist, title, time, ref search_result);
@@ -51,20 +51,20 @@ namespace LyricsFinder
             DumpSearchList("+", time, search_result);
 
             if (search_result.Count==0)
-                return null;
+                return default;
 
             Lyrics lyric_cont = null;
             SEARCHRESULT cur_result = null;
 
             foreach (var result in search_result)
             {
-                var content = Downloader.DownloadLyric(result, request_trans_lyrics);
+                var content = await Downloader.DownloadLyricAsync(result, request_trans_lyrics);
                 cur_result=result;
 
                 if (string.IsNullOrWhiteSpace(content))
                     continue;
 
-                lyric_cont=Parser.Parse(content);
+                lyric_cont = Parser.Parse(content);
 
                 //过滤没有实质歌词内容的玩意,比如没有时间轴的歌词文本
                 if (lyric_cont?.LyricsSentences?.Count==0)
@@ -75,13 +75,11 @@ namespace LyricsFinder
             }
 
             if (lyric_cont==null)
-                return null;
-
-            picked_result=cur_result;
+                return default;
 
             WrapInfo(lyric_cont);
 
-            return lyric_cont;
+            return (lyric_cont,cur_result);
 
             #region Wrap Methods
 

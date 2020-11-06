@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace LyricsFinder.SourcePrivoder.Kugou
 {
@@ -28,25 +29,25 @@ namespace LyricsFinder.SourcePrivoder.Kugou
     {
         private static readonly string API_URL = @"http://mobilecdn.kugou.com/api/v3/search/song?format=json&keyword={1} {0}&page=1&pagesize=20&showtype=1";
 
-        public override List<KugouSearchResultSong> Search(params string[] param_arr)
+        public override async Task<List<KugouSearchResultSong>> SearchAsync(params string[] param_arr)
         {
             string title = param_arr[0], artist = param_arr[1];
             Uri url = new Uri(string.Format(API_URL, artist, title));
 
             //这纸张酷狗有时候response不回来,但用浏览器就可以.先留校观察
             HttpWebRequest request = HttpWebRequest.CreateHttp(url);
-            request.Method="GET";
-            request.CachePolicy=new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
-            request.UserAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36";
-            request.Timeout=GlobalSetting.SearchAndDownloadTimeout;
+            request.Method = "GET";
+            request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
+            request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36";
+            request.Timeout = GlobalSetting.SearchAndDownloadTimeout;
 
-            var response = request.GetResponse();
+            var response = await request.GetResponseAsync();
 
             string content = string.Empty;
 
             using (var reader = new StreamReader(response.GetResponseStream()))
             {
-                content=reader.ReadToEnd();
+                content = await reader.ReadToEndAsync();
             }
 
             var json = JObject.Parse(content);

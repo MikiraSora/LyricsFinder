@@ -1,17 +1,21 @@
 ﻿using LyricsFinder.SourcePrivoder;
 using LyricsFinder.SourcePrivoder.Auto;
+using LyricsFinder.SourcePrivoder.Kugou;
 using System;
+using System.Threading.Tasks;
 
 namespace LyricsFinder.Example
 {
     class Program
     {
-        static void Main(string[] args)
+        async static Task Main(string[] args)
         {
+            GlobalSetting.DebugMode = true;
+
             SourceProviderManager.LoadDefaultProviders();
 
-            var provider = AutoSourceProvider.FindDefaultImplsToCreate();
-            var lyrics = provider.ProvideLyric("ゆある", "アスノヨゾラ哨戒班", 177000, false);
+            var provider = new KugouSourceProvider(); //AutoSourceProvider.FindDefaultImplsToCreate();
+            var lyrics = await provider.ProvideLyricAsync("ゆある", "アスノヨゾラ哨戒班", 177000, false);
 
             Console.WriteLine("actual provider name : " + lyrics.ProviderName);
 

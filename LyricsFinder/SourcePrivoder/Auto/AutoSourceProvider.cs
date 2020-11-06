@@ -25,15 +25,15 @@ namespace LyricsFinder.SourcePrivoder.Auto
             search_engines = other_source_providers ?? Array.Empty<SourceProviderBase>();
         }
 
-        public override Lyrics ProvideLyric(string artist, string title, int time, bool request_trans_lyrics)
+        public override async Task<Lyrics> ProvideLyricAsync(string artist, string title, int time, bool request_trans_lyrics)
         {
             var id = artist+title+time;
 
             //保证同一谱面获取的翻译歌词和原歌词都是同一个歌词源，这样歌词合并的时候会好很多
             if (cache_provider.TryGetValue(id,out var provider))
-                return GetLyricFromExcplictSource(provider, artist, title, time, request_trans_lyrics);
+                return await GetLyricFromExcplictSource(provider, artist, title, time, request_trans_lyrics);
 
-            var lyrics = GetLyricFromAnySource(artist, title, time, request_trans_lyrics, out provider);
+            var lyrics = await GetLyricFromAnySource(artist, title, time, request_trans_lyrics, out provider);
 
             if (lyrics!=null)
                 cache_provider[id]=provider;
@@ -41,11 +41,11 @@ namespace LyricsFinder.SourcePrivoder.Auto
             return lyrics;
         }
 
-        public Lyrics GetLyricFromAnySource(string artist, string title, int time, bool request_trans_lyrics,out SourceProviderBase provider)
+        public Task<Lyrics> GetLyricFromAnySource(string artist, string title, int time, bool request_trans_lyrics,out SourceProviderBase provider)
         {
             var cancel_source = new System.Threading.CancellationTokenSource();
 
-            var tasks = search_engines.Select(l => Task.Run(() => (l.ProvideLyric(artist, title, time, request_trans_lyrics), l), cancel_source.Token));
+            var tasks = search_engines.Select(l => Task.Run(() => (l.ProvideLyricAsync(artist, title, time, request_trans_lyrics), l), cancel_source.Token));
 
             provider=null;
 
@@ -73,9 +73,9 @@ namespace LyricsFinder.SourcePrivoder.Auto
             return null;
         }
 
-        public Lyrics GetLyricFromExcplictSource(SourceProviderBase provider, string artist, string title, int time, bool request_trans_lyrics)
+        public Task<Lyrics> GetLyricFromExcplictSource(SourceProviderBase provider, string artist, string title, int time, bool request_trans_lyrics)
         {
-            var lyrics = provider.ProvideLyric(artist, title, time, request_trans_lyrics);
+            var lyrics = provider.ProvideLyricAsync(artist, title, time, request_trans_lyrics);
 
             return lyrics;
         }
