@@ -71,7 +71,8 @@ namespace LyricsFinder
                 if (lyric_cont?.LyricsSentences?.Count==0)
                     continue;
 
-                Utils.Debug($"* Picked music_id:{result.ID} artist:{result.Artist} title:{result.Title}");
+                Utils.Debug($"* Picked [{ProviderName}] music_id:{result.ID} artist:{result.Artist} title:{result.Title}");
+
                 break;
             }
 
@@ -109,11 +110,11 @@ namespace LyricsFinder
             #endregion Wrap Methods
         }
 
-        private static void DumpSearchList(string prefix, int time, List<SEARCHRESULT> search_list)
+        private void DumpSearchList(string prefix, int time, List<SEARCHRESULT> search_list)
         {
             if (GlobalSetting.DebugMode)
                 foreach (var r in search_list)
-                    Utils.Debug($"{prefix} music_id:{r.ID} artist:{r.Artist} title:{r.Title} time{r.Duration}({Math.Abs(r.Duration-time):F2})");
+                    Utils.Debug($"{prefix} [{ProviderName}] music_id:{r.ID} artist:{r.Artist} title:{r.Title} time{r.Duration}({Math.Abs(r.Duration-time):F2})");
         }
 
         public virtual void FuckSearchFilte(string artist, string title, int time, ref List<SEARCHRESULT> search_result)
