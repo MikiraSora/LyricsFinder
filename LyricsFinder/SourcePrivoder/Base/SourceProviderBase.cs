@@ -28,8 +28,12 @@ namespace LyricsFinder
             try
             {
                 var search_result = await Seadrcher.SearchAsync(new []{ artist, title }, cancel_token);
+                if (cancel_token.IsCancellationRequested)
+                    return default;
 
                 var (lyrics, picked_result) = await PickLyricAsync(artist, title, time, search_result, request_trans_lyrics, cancel_token);
+                if (cancel_token.IsCancellationRequested)
+                    return default;
 
                 if (lyrics != null)
                     lyrics.ProviderName = ProviderName;
@@ -60,7 +64,10 @@ namespace LyricsFinder
             foreach (var result in search_result)
             {
                 var content = await Downloader.DownloadLyricAsync(result, request_trans_lyrics, cancel_token);
-                cur_result=result;
+                if (cancel_token.IsCancellationRequested)
+                    return default;
+
+                cur_result =result;
 
                 if (string.IsNullOrWhiteSpace(content))
                     continue;

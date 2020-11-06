@@ -2,6 +2,7 @@
 using LyricsFinder.SourcePrivoder.Auto;
 using LyricsFinder.SourcePrivoder.Kugou;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LyricsFinder.Example
@@ -13,16 +14,33 @@ namespace LyricsFinder.Example
             GlobalSetting.DebugMode = true;
 
             SourceProviderManager.LoadDefaultProviders();
-
             var provider = AutoSourceProvider.FindDefaultImplsToCreate();
-            var lyrics = await provider.ProvideLyricAsync("ゆある", "アスノヨゾラ哨戒班", 177000, false);
+            var cancelTokenSource = new CancellationTokenSource();
 
-            Console.WriteLine("actual provider name : " + lyrics.ProviderName);
-
-            foreach (var item in lyrics.LyricsSentences)
+            new Thread(async () =>
             {
-                Console.WriteLine(item.Content);
-            }
+                Console.WriteLine("begin.");
+
+                var lyrics = await provider.ProvideLyricAsync("ゆある", "アスノヨゾラ哨戒班", 177000, false, cancelTokenSource.Token);
+                if (lyrics is null)
+                {
+                    Console.WriteLine("null.");
+                    return;
+                }
+
+                Console.WriteLine("actual provider name : " + lyrics.ProviderName);
+
+                foreach (var item in lyrics.LyricsSentences)
+                {
+                    Console.WriteLine(item.Content);
+                }
+                Console.WriteLine("finish.");
+            }).Start();
+
+            Thread.Sleep(200);
+            cancelTokenSource.Cancel();
+            Console.WriteLine("canceled.");
+            Console.ReadLine();
         }
     }
 }
