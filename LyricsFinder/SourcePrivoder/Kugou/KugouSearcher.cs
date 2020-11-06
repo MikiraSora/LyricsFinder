@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LyricsFinder.SourcePrivoder.Kugou
@@ -29,9 +31,9 @@ namespace LyricsFinder.SourcePrivoder.Kugou
     {
         private static readonly string API_URL = @"http://mobilecdn.kugou.com/api/v3/search/song?format=json&keyword={1} {0}&page=1&pagesize=20&showtype=1";
 
-        public override async Task<List<KugouSearchResultSong>> SearchAsync(params string[] param_arr)
+        public override async Task<List<KugouSearchResultSong>> SearchAsync(IEnumerable<string> param_arr,CancellationToken cancel_token)
         {
-            string title = param_arr[0], artist = param_arr[1];
+            string title = param_arr.FirstOrDefault(), artist = param_arr.LastOrDefault();
             Uri url = new Uri(string.Format(API_URL, artist, title));
 
             //这纸张酷狗有时候response不回来,但用浏览器就可以.先留校观察
@@ -42,12 +44,16 @@ namespace LyricsFinder.SourcePrivoder.Kugou
             request.Timeout = GlobalSetting.SearchAndDownloadTimeout;
 
             var response = await request.GetResponseAsync();
+            if (cancel_token.IsCancellationRequested)
+                return default;
 
             string content = string.Empty;
 
             using (var reader = new StreamReader(response.GetResponseStream()))
             {
-                content = await reader.ReadToEndAsync();
+                content = await reader.CancelableReadToEndAsync(cancel_token);
+                if (cancel_token.IsCancellationRequested)
+                    return default;
             }
 
             var json = JObject.Parse(content);

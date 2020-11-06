@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LyricsFinder
@@ -13,7 +14,7 @@ namespace LyricsFinder
         private string _providerName;
         public string ProviderName => _providerName ?? (_providerName = this.GetType().GetCustomAttribute<SourceProviderNameAttribute>()?.Name ?? "unknown");
 
-        public abstract Task<Lyrics> ProvideLyricAsync(string artist, string title, int time, bool request_trans_lyrics);
+        public abstract Task<Lyrics> ProvideLyricAsync(string artist, string title, int time, bool request_trans_lyrics, CancellationToken cancel_token);
     }
 
     public abstract class SourceProviderBase<SEARCHRESULT, SEARCHER, DOWNLOADER, PARSER> : SourceProviderBase where DOWNLOADER : LyricDownloaderBase, new() where PARSER : LyricParserBase, new() where SEARCHER : SongSearchBase<SEARCHRESULT>, new() where SEARCHRESULT : SearchSongResultBase, new()
@@ -22,13 +23,13 @@ namespace LyricsFinder
         public SEARCHER Seadrcher { get; } = new SEARCHER();
         public PARSER Parser { get; } = new PARSER();
 
-        public override async Task<Lyrics> ProvideLyricAsync(string artist, string title, int time, bool request_trans_lyrics)
+        public override async Task<Lyrics> ProvideLyricAsync(string artist, string title, int time, bool request_trans_lyrics, CancellationToken cancel_token = default)
         {
             try
             {
-                var search_result = await Seadrcher.SearchAsync(artist, title);
+                var search_result = await Seadrcher.SearchAsync(new []{ artist, title }, cancel_token);
 
-                var (lyrics, picked_result) = await PickLyricAsync(artist, title, time, search_result, request_trans_lyrics);
+                var (lyrics, picked_result) = await PickLyricAsync(artist, title, time, search_result, request_trans_lyrics, cancel_token);
 
                 if (lyrics != null)
                     lyrics.ProviderName = ProviderName;
@@ -42,7 +43,7 @@ namespace LyricsFinder
             }
         }
 
-        public virtual async Task<(Lyrics , SEARCHRESULT)> PickLyricAsync(string artist, string title, int time, List<SEARCHRESULT> search_result, bool request_trans_lyrics)
+        public virtual async Task<(Lyrics , SEARCHRESULT)> PickLyricAsync(string artist, string title, int time, List<SEARCHRESULT> search_result, bool request_trans_lyrics, CancellationToken cancel_token)
         {
             DumpSearchList("-", time, search_result);
 
@@ -58,7 +59,7 @@ namespace LyricsFinder
 
             foreach (var result in search_result)
             {
-                var content = await Downloader.DownloadLyricAsync(result, request_trans_lyrics);
+                var content = await Downloader.DownloadLyricAsync(result, request_trans_lyrics, cancel_token);
                 cur_result=result;
 
                 if (string.IsNullOrWhiteSpace(content))

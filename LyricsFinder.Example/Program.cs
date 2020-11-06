@@ -14,7 +14,7 @@ namespace LyricsFinder.Example
 
             SourceProviderManager.LoadDefaultProviders();
 
-            var provider = new KugouSourceProvider(); //AutoSourceProvider.FindDefaultImplsToCreate();
+            var provider = AutoSourceProvider.FindDefaultImplsToCreate();
             var lyrics = await provider.ProvideLyricAsync("ゆある", "アスノヨゾラ哨戒班", 177000, false);
 
             Console.WriteLine("actual provider name : " + lyrics.ProviderName);

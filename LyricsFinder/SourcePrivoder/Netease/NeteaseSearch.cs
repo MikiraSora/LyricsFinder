@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using static LyricsFinder.SourcePrivoder.Netease.NeteaseSearch;
 
@@ -58,9 +59,9 @@ namespace LyricsFinder.SourcePrivoder.Netease
         private static readonly string API_URL = "http://music.163.com/api/search/get/";
         private static readonly int SEARCH_LIMIT = 5;
 
-        public override async Task<List<Song>> SearchAsync(params string[] param_arr)
+        public override async Task<List<Song>> SearchAsync(IEnumerable<string> param_arr,CancellationToken cancel_token)
         {
-            string title = param_arr[0], artist = param_arr[1];
+            string title = param_arr.FirstOrDefault(), artist = param_arr.LastOrDefault();
             Uri url = new Uri($"{API_URL}?s={artist} {title}&limit={SEARCH_LIMIT}&type=1&offset=0");
 
             HttpWebRequest request = HttpWebRequest.CreateHttp(url);
@@ -70,12 +71,16 @@ namespace LyricsFinder.SourcePrivoder.Netease
             request.Headers["appver"] = $"2.0.2";
 
             var response = await request.GetResponseAsync();
+            if (cancel_token.IsCancellationRequested)
+                return default;
 
             string content = string.Empty;
 
             using (var reader = new StreamReader(response.GetResponseStream()))
             {
-                content = await reader.ReadToEndAsync();
+                content = await reader.CancelableReadToEndAsync(cancel_token);
+                if (cancel_token.IsCancellationRequested)
+                    return default;
             }
 
             JObject json = JObject.Parse(content);

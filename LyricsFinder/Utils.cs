@@ -1,12 +1,33 @@
 ﻿using LyricsFinder.SourcePrivoder;
 using System;
+using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace LyricsFinder
 {
     internal static class Utils
     {
+        public static async Task<string> CancelableReadToEndAsync(this StreamReader reader, CancellationToken token)
+        {
+            using var memStream = new MemoryStream();
+            var buffer = new byte[1024];
+
+            while (!token.IsCancellationRequested)
+            {
+                var read = await reader.BaseStream.ReadAsync(buffer, 0, buffer.Length);
+                if (read == 0 || token.IsCancellationRequested)
+                    break;
+                await memStream.WriteAsync(buffer, 0, read);
+            }
+
+            memStream.Seek(0, SeekOrigin.Begin);
+            var str = Encoding.UTF8.GetString(memStream.ToArray());
+            return str;
+        }
+
         public static void Output(string message, bool new_line = true, bool time = true)
         {
             var msg = (time ? "[" + DateTime.Now.ToLongTimeString() + "] " : string.Empty)

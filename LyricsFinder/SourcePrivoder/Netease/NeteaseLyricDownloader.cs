@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LyricsFinder.SourcePrivoder.Netease
@@ -11,18 +12,22 @@ namespace LyricsFinder.SourcePrivoder.Netease
         //lv=1 是源版本歌词
         private static readonly string LYRIC_API_URL = "https://music.163.com/api/song/lyric?id={0}&{1}";
 
-        public override async Task<string> DownloadLyricAsync(SearchSongResultBase song, bool request_trans_lyrics)
+        public override async Task<string> DownloadLyricAsync(SearchSongResultBase song, bool request_trans_lyrics, CancellationToken cancel_token)
         {
             HttpWebRequest request = HttpWebRequest.CreateHttp(string.Format(LYRIC_API_URL, song.ID, request_trans_lyrics ? "tv=-1" : "lv=1"));
             request.Timeout = GlobalSetting.SearchAndDownloadTimeout;
 
             var response = await request.GetResponseAsync();
+            if (cancel_token.IsCancellationRequested)
+                return default;
 
             string content = string.Empty;
 
             using (var reader = new StreamReader(response.GetResponseStream()))
             {
-                content = await reader.ReadToEndAsync();
+                content = await reader.CancelableReadToEndAsync(cancel_token);
+                if (cancel_token.IsCancellationRequested)
+                    return default;
             }
 
             JObject json = JObject.Parse(content);

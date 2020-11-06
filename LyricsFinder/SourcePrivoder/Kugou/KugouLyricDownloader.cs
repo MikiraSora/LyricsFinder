@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LyricsFinder.SourcePrivoder.Kugou
@@ -10,7 +11,7 @@ namespace LyricsFinder.SourcePrivoder.Kugou
     {
         public static readonly string API_URL = @"http://www.kugou.com/yy/index.php?r=play/getdata&hash={0}";
 
-        public override async Task<string> DownloadLyricAsync(SearchSongResultBase song, bool request_trans_lyrics)
+        public override async Task<string> DownloadLyricAsync(SearchSongResultBase song, bool request_trans_lyrics, CancellationToken cancel_token)
         {
             //没支持翻译歌词的
             if (request_trans_lyrics)
@@ -22,12 +23,16 @@ namespace LyricsFinder.SourcePrivoder.Kugou
             request.Timeout = GlobalSetting.SearchAndDownloadTimeout;
 
             var response = await request.GetResponseAsync();
+            if (cancel_token.IsCancellationRequested)
+                return default;
 
             string content = string.Empty;
 
             using (var reader = new StreamReader(response.GetResponseStream()))
             {
-                content = await reader.ReadToEndAsync();
+                content = await reader.CancelableReadToEndAsync(cancel_token);
+                if (cancel_token.IsCancellationRequested)
+                    return default;
             }
 
             JObject obj = JObject.Parse(content);
