@@ -62,7 +62,9 @@ namespace LyricsFinder.SourcePrivoder.QQMusic
             Uri url = new Uri(string.Format(API_URL, artist, title));
 
             HttpWebRequest request = HttpWebRequest.CreateHttp(url);
-            request.Timeout = GlobalSetting.SearchAndDownloadTimeout;
+
+            if (GlobalSetting.SearchAndDownloadTimeout > 0)
+                request.Timeout = GlobalSetting.SearchAndDownloadTimeout;
 
             var response = await request.GetResponseAsync();
             if (cancel_token.IsCancellationRequested)

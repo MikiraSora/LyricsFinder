@@ -15,7 +15,9 @@ namespace LyricsFinder.SourcePrivoder.Netease
         public override async Task<string> DownloadLyricAsync(SearchSongResultBase song, bool request_trans_lyrics, CancellationToken cancel_token)
         {
             HttpWebRequest request = HttpWebRequest.CreateHttp(string.Format(LYRIC_API_URL, song.ID, request_trans_lyrics ? "tv=-1" : "lv=1"));
-            request.Timeout = GlobalSetting.SearchAndDownloadTimeout;
+
+            if (GlobalSetting.SearchAndDownloadTimeout > 0)
+                request.Timeout = GlobalSetting.SearchAndDownloadTimeout;
 
             var response = await request.GetResponseAsync();
             if (cancel_token.IsCancellationRequested)

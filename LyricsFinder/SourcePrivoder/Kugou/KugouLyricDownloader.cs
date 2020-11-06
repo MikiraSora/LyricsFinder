@@ -20,7 +20,9 @@ namespace LyricsFinder.SourcePrivoder.Kugou
             Uri url = new Uri(string.Format(API_URL, song.ID));
 
             HttpWebRequest request = HttpWebRequest.CreateHttp(url);
-            request.Timeout = GlobalSetting.SearchAndDownloadTimeout;
+
+            if (GlobalSetting.SearchAndDownloadTimeout > 0)
+                request.Timeout = GlobalSetting.SearchAndDownloadTimeout;
 
             var response = await request.GetResponseAsync();
             if (cancel_token.IsCancellationRequested)

@@ -41,7 +41,9 @@ namespace LyricsFinder.SourcePrivoder.Kugou
             request.Method = "GET";
             request.CachePolicy = new System.Net.Cache.RequestCachePolicy(System.Net.Cache.RequestCacheLevel.NoCacheNoStore);
             request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36";
-            request.Timeout = GlobalSetting.SearchAndDownloadTimeout;
+
+            if (GlobalSetting.SearchAndDownloadTimeout > 0)
+                request.Timeout = GlobalSetting.SearchAndDownloadTimeout;
 
             var response = await request.GetResponseAsync();
             if (cancel_token.IsCancellationRequested)
