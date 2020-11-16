@@ -10,7 +10,7 @@ namespace LyricsFinder
 {
     internal static class Utils
     {
-        public static async Task<string> CancelableReadToEndAsync(this StreamReader reader, CancellationToken token = default,Encoding encoding = default)
+        public static async ValueTask<string> CancelableReadToEndAsync(this StreamReader reader, CancellationToken token = default,Encoding encoding = default)
         {
             encoding ??= Encoding.UTF8;
 

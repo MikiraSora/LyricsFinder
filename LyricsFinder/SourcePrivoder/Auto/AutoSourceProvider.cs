@@ -28,7 +28,7 @@ namespace LyricsFinder.SourcePrivoder.Auto
             search_engines = other_source_providers ?? Array.Empty<SourceProviderBase>();
         }
 
-        public override async Task<Lyrics> ProvideLyricAsync(string artist, string title, int time, bool request_trans_lyrics, CancellationToken cancel_token = default)
+        public override async ValueTask<Lyrics> ProvideLyricAsync(string artist, string title, int time, bool request_trans_lyrics, CancellationToken cancel_token = default)
         {
             var id = artist + title + time;
 
@@ -44,7 +44,7 @@ namespace LyricsFinder.SourcePrivoder.Auto
             return lyrics;
         }
 
-        public async Task<(Lyrics, SourceProviderBase)> GetLyricFromAnySource(string artist, string title, int time, bool request_trans_lyrics, CancellationToken cancel_token)
+        public async ValueTask<(Lyrics, SourceProviderBase)> GetLyricFromAnySource(string artist, string title, int time, bool request_trans_lyrics, CancellationToken cancel_token)
         {
             var internalCancelTokenSource = new CancellationTokenSource();
             cancel_token.Register(() => internalCancelTokenSource.Cancel());
@@ -52,13 +52,14 @@ namespace LyricsFinder.SourcePrivoder.Auto
             var taskMap = new Dictionary<Task<Lyrics>, SourceProviderBase>();
 
             foreach (var provider in search_engines)
-                taskMap[provider.ProvideLyricAsync(artist, title, time, request_trans_lyrics, internalCancelTokenSource.Token)] = provider;
+                taskMap[provider.ProvideLyricAsync(artist, title, time, request_trans_lyrics, internalCancelTokenSource.Token).AsTask()] = provider;
 
             var running_tasks = taskMap.Keys.ToList();
 
             while (running_tasks.Count > 0 && !cancel_token.IsCancellationRequested)
             {
                 var finishTask = await Task.WhenAny(running_tasks);
+
                 running_tasks.Remove(finishTask);
 
                 var lyrics = await finishTask;

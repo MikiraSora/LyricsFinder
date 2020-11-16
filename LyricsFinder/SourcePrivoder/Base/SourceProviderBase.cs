@@ -14,7 +14,7 @@ namespace LyricsFinder
         private string _providerName;
         public string ProviderName => _providerName ?? (_providerName = this.GetType().GetCustomAttribute<SourceProviderNameAttribute>()?.Name ?? "unknown");
 
-        public abstract Task<Lyrics> ProvideLyricAsync(string artist, string title, int time, bool request_trans_lyrics, CancellationToken cancel_token);
+        public abstract ValueTask<Lyrics> ProvideLyricAsync(string artist, string title, int time, bool request_trans_lyrics, CancellationToken cancel_token);
     }
 
     public abstract class SourceProviderBase<SEARCHRESULT, SEARCHER, DOWNLOADER, PARSER> : SourceProviderBase where DOWNLOADER : LyricDownloaderBase<SEARCHRESULT>, new() where PARSER : LyricParserBase, new() where SEARCHER : SongSearchBase<SEARCHRESULT>, new() where SEARCHRESULT : SearchSongResultBase, new()
@@ -23,7 +23,7 @@ namespace LyricsFinder
         public SEARCHER Seadrcher { get; } = new SEARCHER();
         public PARSER Parser { get; } = new PARSER();
 
-        public override async Task<Lyrics> ProvideLyricAsync(string artist, string title, int time, bool request_trans_lyrics, CancellationToken cancel_token = default)
+        public override async ValueTask<Lyrics> ProvideLyricAsync(string artist, string title, int time, bool request_trans_lyrics, CancellationToken cancel_token = default)
         {
             try
             {
@@ -47,7 +47,7 @@ namespace LyricsFinder
             }
         }
 
-        public virtual async Task<(Lyrics , SEARCHRESULT)> PickLyricAsync(string artist, string title, int time, List<SEARCHRESULT> search_result, bool request_trans_lyrics, CancellationToken cancel_token)
+        public virtual async ValueTask<(Lyrics , SEARCHRESULT)> PickLyricAsync(string artist, string title, int time, List<SEARCHRESULT> search_result, bool request_trans_lyrics, CancellationToken cancel_token)
         {
             DumpSearchList("-", time, search_result);
 

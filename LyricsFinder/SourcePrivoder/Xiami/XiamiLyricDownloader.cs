@@ -12,7 +12,7 @@ namespace LyricsFinder.SourcePrivoder.Xiami
     {
         private static Regex xlrcRegex = new Regex(@"<\d+?>");
 
-        public override async Task<string> DownloadLyricAsync(XiamiSearchResultSong song, bool request_trans_lyrics, CancellationToken cancel_token)
+        public override async ValueTask<string> DownloadLyricAsync(XiamiSearchResultSong song, bool request_trans_lyrics, CancellationToken cancel_token)
         {
             if (string.IsNullOrWhiteSpace(song.LyricFile))
                 return default;

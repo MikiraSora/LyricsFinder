@@ -13,7 +13,7 @@ namespace LyricsFinder.SourcePrivoder.Netease
         //lv=1 是源版本歌词
         private static readonly string LYRIC_API_URL = "https://music.163.com/api/song/lyric?id={0}&{1}";
 
-        public override async Task<string> DownloadLyricAsync(Song song, bool request_trans_lyrics, CancellationToken cancel_token)
+        public override async ValueTask<string> DownloadLyricAsync(Song song, bool request_trans_lyrics, CancellationToken cancel_token)
         {
             HttpWebRequest request = HttpWebRequest.CreateHttp(string.Format(LYRIC_API_URL, song.ID, request_trans_lyrics ? "tv=-1" : "lv=1"));
 

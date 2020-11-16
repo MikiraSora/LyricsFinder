@@ -13,7 +13,7 @@ namespace LyricsFinder.SourcePrivoder.QQMusic
 
         public static readonly string NEW_API_URL = @"https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?g_tk=753738303&songmid={0}&callback=json&songtype={1}";
 
-        public override async Task<string> DownloadLyricAsync(Song song, bool request_trans_lyrics, CancellationToken cancel_token)
+        public override async ValueTask<string> DownloadLyricAsync(Song song, bool request_trans_lyrics, CancellationToken cancel_token)
         {
             string song_type = (song as Song)?.type ?? "0";
 

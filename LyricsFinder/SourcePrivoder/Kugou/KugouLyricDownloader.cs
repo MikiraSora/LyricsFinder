@@ -11,7 +11,7 @@ namespace LyricsFinder.SourcePrivoder.Kugou
     {
         public static readonly string API_URL = @"http://www.kugou.com/yy/index.php?r=play/getdata&hash={0}";
 
-        public override async Task<string> DownloadLyricAsync(KugouSearchResultSong song, bool request_trans_lyrics, CancellationToken cancel_token)
+        public override async ValueTask<string> DownloadLyricAsync(KugouSearchResultSong song, bool request_trans_lyrics, CancellationToken cancel_token)
         {
             //没支持翻译歌词的
             if (request_trans_lyrics)
