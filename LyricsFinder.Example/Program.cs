@@ -14,6 +14,8 @@ namespace LyricsFinder.Example
         {
             GlobalSetting.DebugMode = true;
 
+            SourceProviderManager.LoadDefaultProviders();
+            //var provider = AutoSourceProvider.FindDefaultImplsToCreate();
             var provider = new XiamiSourceProvider();
             var result = await provider.ProvideLyricAsync("Leaf", "時の魔法", 321036, false);
 

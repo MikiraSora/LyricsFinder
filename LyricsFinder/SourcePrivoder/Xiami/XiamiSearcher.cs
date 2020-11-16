@@ -8,9 +8,27 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static LyricsFinder.SourcePrivoder.Xiami.XiamiLyricsInfo;
 
 namespace LyricsFinder.SourcePrivoder.Xiami
 {
+    public class XiamiLyricsInfo
+    {
+        public string lyricFile { get; set; }
+
+        public enum LyricType
+        {
+            NONE = -1,
+            Text = 1,
+            LRC = 2,
+            TRC = 3,
+            TranslatedLRC = 4,
+            XTRC = 7,
+        }
+
+        public LyricType lyricType { get; set; }
+    }
+
     public class XiamiSearchResultSong : SearchSongResultBase
     {
         public string songStringId { get; set; }
@@ -23,12 +41,17 @@ namespace LyricsFinder.SourcePrivoder.Xiami
         public override int Duration => length;
         public override string ID => songStringId;
 
-        public string LyricFile { get; set; }
+        public XiamiLyricsInfo lyricInfo { get; set; }
 
-        internal XiamiSearchResultSong ProcessJsonSelf(JToken x)
+        private static LyricType[] avaliableLyricsTypeList { get; set; } = new[]
         {
-            LyricFile = x.SelectToken("lyricInfo.lyricFile")?.ToString();
-            return this;
+            LyricType.TranslatedLRC,LyricType.TRC,LyricType.XTRC,LyricType.LRC
+        };
+
+        internal bool ContainLyrics()
+        {
+            return (!string.IsNullOrWhiteSpace(lyricInfo?.lyricFile))
+                && avaliableLyricsTypeList.Contains(lyricInfo?.lyricType?? LyricType.NONE);
         }
     }
 
@@ -45,7 +68,9 @@ namespace LyricsFinder.SourcePrivoder.Xiami
             if (json is null)
                 return default;
 
-            var result = json["result"]["data"]["songs"].Select(x => x.ToObject<XiamiSearchResultSong>().ProcessJsonSelf(x)).Where(x => !string.IsNullOrWhiteSpace(x.LyricFile)).ToList();
+            var result = json["result"]["data"]["songs"]
+                .Select(x => x.ToObject<XiamiSearchResultSong>())
+                .Where(x => x.ContainLyrics()).ToList();
             return result;
         }
     }

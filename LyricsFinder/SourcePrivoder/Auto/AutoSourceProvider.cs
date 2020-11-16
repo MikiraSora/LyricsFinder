@@ -16,7 +16,8 @@ namespace LyricsFinder.SourcePrivoder.Auto
 
         private Dictionary<string, SourceProviderBase> cache_provider = new Dictionary<string, SourceProviderBase>();
 
-        public static AutoSourceProvider FindDefaultImplsToCreate() => new AutoSourceProvider(SourceProviderManager.LyricsSourceProvidersTypes
+        public static AutoSourceProvider FindDefaultImplsToCreate() => new AutoSourceProvider(
+            SourceProviderManager.LyricsSourceProvidersTypes
                 .Select(x => x.GetCustomAttribute<SourceProviderNameAttribute>())
                 .OfType<SourceProviderNameAttribute>()
                 .Where(x => !x.Name.Equals("auto", StringComparison.InvariantCultureIgnoreCase))

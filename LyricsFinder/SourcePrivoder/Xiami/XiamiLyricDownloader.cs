@@ -14,10 +14,10 @@ namespace LyricsFinder.SourcePrivoder.Xiami
 
         public override async ValueTask<string> DownloadLyricAsync(XiamiSearchResultSong song, bool request_trans_lyrics, CancellationToken cancel_token)
         {
-            if (string.IsNullOrWhiteSpace(song.LyricFile))
+            if (string.IsNullOrWhiteSpace(song.lyricInfo.lyricFile))
                 return default;
 
-            HttpWebRequest request = HttpWebRequest.CreateHttp(song.LyricFile);
+            HttpWebRequest request = HttpWebRequest.CreateHttp(song.lyricInfo.lyricFile);
 
             if (GlobalSetting.SearchAndDownloadTimeout > 0)
                 request.Timeout = GlobalSetting.SearchAndDownloadTimeout;
@@ -33,7 +33,10 @@ namespace LyricsFinder.SourcePrivoder.Xiami
             if (cancel_token.IsCancellationRequested)
                 return default;
 
-            if (song.LyricFile.EndsWith(".xtrc"))
+            if (song.lyricInfo.lyricFile.EndsWith(".xtrc") ||
+                song.lyricInfo.lyricType == XiamiLyricsInfo.LyricType.XTRC ||
+                song.lyricInfo.lyricFile.EndsWith(".trc") ||
+                song.lyricInfo.lyricType == XiamiLyricsInfo.LyricType.TRC)
             {
                 //移除xlrc歌词文本中单词时间点
                 content = xlrcRegex.Replace(content,"");
