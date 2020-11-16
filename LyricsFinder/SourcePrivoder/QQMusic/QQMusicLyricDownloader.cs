@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace LyricsFinder.SourcePrivoder.QQMusic
 {
-    public class QQMusicLyricDownloader : LyricDownloaderBase
+    public class QQMusicLyricDownloader : LyricDownloaderBase<Song>
     {
         //public static readonly string API_URL = @"http://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric.fcg?nobase64=1&musicid={0}&callback=json&g_tk=5381&loginUin=0&hostUin=0&format=json&inCharset=utf-8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0&songtype={1}";
 
         public static readonly string NEW_API_URL = @"https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?g_tk=753738303&songmid={0}&callback=json&songtype={1}";
 
-        public override async Task<string> DownloadLyricAsync(SearchSongResultBase song, bool request_trans_lyrics, CancellationToken cancel_token)
+        public override async Task<string> DownloadLyricAsync(Song song, bool request_trans_lyrics, CancellationToken cancel_token)
         {
             string song_type = (song as Song)?.type ?? "0";
 

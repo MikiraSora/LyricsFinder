@@ -10,9 +10,13 @@ namespace LyricsFinder
 {
     internal static class Utils
     {
-        public static async Task<string> CancelableReadToEndAsync(this StreamReader reader, CancellationToken token)
+        public static async Task<string> CancelableReadToEndAsync(this StreamReader reader, CancellationToken token = default,Encoding encoding = default)
         {
+            encoding ??= Encoding.UTF8;
+
             using var memStream = new MemoryStream();
+            using var tempStream = File.OpenWrite("dd.txt");
+
             var buffer = new byte[1024];
 
             while (!token.IsCancellationRequested)
@@ -21,10 +25,11 @@ namespace LyricsFinder
                 if (read == 0 || token.IsCancellationRequested)
                     break;
                 await memStream.WriteAsync(buffer, 0, read);
+                await tempStream.WriteAsync(buffer, 0, read);
             }
 
             memStream.Seek(0, SeekOrigin.Begin);
-            var str = Encoding.UTF8.GetString(memStream.ToArray());
+            var str = encoding.GetString(memStream.ToArray());
             return str;
         }
 

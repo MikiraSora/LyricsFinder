@@ -1,6 +1,7 @@
 ﻿using LyricsFinder.SourcePrivoder;
 using LyricsFinder.SourcePrivoder.Auto;
 using LyricsFinder.SourcePrivoder.Kugou;
+using LyricsFinder.SourcePrivoder.Xiami;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,34 +14,9 @@ namespace LyricsFinder.Example
         {
             GlobalSetting.DebugMode = true;
 
-            SourceProviderManager.LoadDefaultProviders();
-            var provider = AutoSourceProvider.FindDefaultImplsToCreate();
-            var cancelTokenSource = new CancellationTokenSource();
+            var provider = new XiamiSourceProvider();
+            var result = await provider.ProvideLyricAsync("Leaf", "時の魔法", 321036, false);
 
-            new Thread(async () =>
-            {
-                Console.WriteLine("begin.");
-
-                var lyrics = await provider.ProvideLyricAsync("ゆある", "アスノヨゾラ哨戒班", 177000, false, cancelTokenSource.Token);
-                if (lyrics is null)
-                {
-                    Console.WriteLine("null.");
-                    return;
-                }
-
-                Console.WriteLine("actual provider name : " + lyrics.ProviderName);
-
-                foreach (var item in lyrics.LyricsSentences)
-                {
-                    Console.WriteLine(item.Content);
-                }
-                Console.WriteLine("finish.");
-            }).Start();
-
-            Thread.Sleep(200);
-            cancelTokenSource.Cancel();
-            Console.WriteLine("canceled.");
-            Console.ReadLine();
         }
     }
 }

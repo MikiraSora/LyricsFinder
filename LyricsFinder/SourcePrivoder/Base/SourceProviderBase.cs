@@ -17,7 +17,7 @@ namespace LyricsFinder
         public abstract Task<Lyrics> ProvideLyricAsync(string artist, string title, int time, bool request_trans_lyrics, CancellationToken cancel_token);
     }
 
-    public abstract class SourceProviderBase<SEARCHRESULT, SEARCHER, DOWNLOADER, PARSER> : SourceProviderBase where DOWNLOADER : LyricDownloaderBase, new() where PARSER : LyricParserBase, new() where SEARCHER : SongSearchBase<SEARCHRESULT>, new() where SEARCHRESULT : SearchSongResultBase, new()
+    public abstract class SourceProviderBase<SEARCHRESULT, SEARCHER, DOWNLOADER, PARSER> : SourceProviderBase where DOWNLOADER : LyricDownloaderBase<SEARCHRESULT>, new() where PARSER : LyricParserBase, new() where SEARCHER : SongSearchBase<SEARCHRESULT>, new() where SEARCHRESULT : SearchSongResultBase, new()
     {
         public DOWNLOADER Downloader { get; } = new DOWNLOADER();
         public SEARCHER Seadrcher { get; } = new SEARCHER();
