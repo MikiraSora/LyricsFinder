@@ -1,9 +1,10 @@
-﻿using Newtonsoft.Json.Linq;
+﻿
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -57,12 +58,12 @@ namespace LyricsFinder.SourcePrivoder.Kugou
                     return default;
             }
 
-            var json = JObject.Parse(content);
+            var json = JsonDocument.Parse(content);
 
-            if (!string.IsNullOrWhiteSpace(json["error"].ToString()))
+            if (!string.IsNullOrWhiteSpace(json.GetValue<string>("error")))
                 return new List<KugouSearchResultSong>();
 
-            return json["data"]["info"].ToObject<List<KugouSearchResultSong>>();
+            return json.GetValue<List<KugouSearchResultSong>>("data","info");
         }
     }
 }

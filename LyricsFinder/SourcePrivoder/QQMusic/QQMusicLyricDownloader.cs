@@ -1,7 +1,9 @@
-﻿using Newtonsoft.Json.Linq;
+﻿
 using System;
 using System.IO;
 using System.Net;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,7 +17,7 @@ namespace LyricsFinder.SourcePrivoder.QQMusic
 
         public override async ValueTask<string> DownloadLyricAsync(Song song, bool request_trans_lyrics, CancellationToken cancel_token)
         {
-            string song_type = (song as Song)?.type ?? "0";
+            var song_type = (song as Song)?.type ?? 0;
 
             Uri url = new Uri(string.Format(NEW_API_URL, song.ID, song_type));
 
@@ -50,13 +52,14 @@ namespace LyricsFinder.SourcePrivoder.QQMusic
             }
 
             content = System.Web.HttpUtility.HtmlDecode(content);
-            JObject json = JObject.Parse(content);
 
-            int result = json["retcode"].ToObject<int>();
+            var json = await JsonDocument.ParseAsync(new MemoryStream(Encoding.UTF8.GetBytes(content)));
+
+            int result = json.GetValue<int>("retcode");
             if (result < 0)
                 return null;
 
-            content = json[request_trans_lyrics ? "trans" : "lyric"]?.ToString();
+            content = json.GetValue<string>(request_trans_lyrics ? "trans" : "lyric");
             if (string.IsNullOrWhiteSpace(content))
                 return null;
 

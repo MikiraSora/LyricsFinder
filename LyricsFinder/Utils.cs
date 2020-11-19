@@ -15,7 +15,6 @@ namespace LyricsFinder
             encoding ??= Encoding.UTF8;
 
             using var memStream = new MemoryStream();
-            using var tempStream = File.OpenWrite("dd.txt");
 
             var buffer = new byte[1024];
 
@@ -25,7 +24,6 @@ namespace LyricsFinder
                 if (read == 0 || token.IsCancellationRequested)
                     break;
                 await memStream.WriteAsync(buffer, 0, read);
-                await tempStream.WriteAsync(buffer, 0, read);
             }
 
             memStream.Seek(0, SeekOrigin.Begin);

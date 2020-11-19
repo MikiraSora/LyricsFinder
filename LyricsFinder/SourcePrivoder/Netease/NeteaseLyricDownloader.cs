@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json.Linq;
-using System.IO;
+﻿using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using static LyricsFinder.SourcePrivoder.Netease.NeteaseSearch;
+using System.Text.Json;
 
 namespace LyricsFinder.SourcePrivoder.Netease
 {
@@ -33,9 +33,9 @@ namespace LyricsFinder.SourcePrivoder.Netease
                     return default;
             }
 
-            JObject json = JObject.Parse(content);
+            var json = JsonDocument.Parse(content);
 
-            return json[request_trans_lyrics ? "tlyric" : "lrc"]?["lyric"]?.ToString() ?? string.Empty;
+            return json.GetValue<string>((request_trans_lyrics ? "tlyric" : "lrc"), "lyric") ?? string.Empty;
         }
     }
 }

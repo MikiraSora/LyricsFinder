@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -61,13 +59,12 @@ namespace LyricsFinder.SourcePrivoder.Xiami
         {
             var paramQ = $"{{\"key\":\"{title} {artist}\",\"pagingVO\":{{\"page\":1,\"pageSize\":30}}}}";
 
-            var json = await GlobalXiamiHttpProcessor.ProcessRequestAsync("/api/search/searchSongs", paramQ, cancellationToken: cancel_token);
+            var json = await XiamiHttpProcessor.ProcessRequestAsync("/api/search/searchSongs", paramQ, cancellationToken: cancel_token);
 
             if (json is null)
                 return default;
 
-            var result = json["result"]["data"]["songs"]
-                .Select(x => x.ToObject<XiamiSearchResultSong>())
+            var result = (json.GetValue<List<XiamiSearchResultSong>>("result","data","songs"))
                 .Where(x => x.ContainLyrics()).ToList();
             return result;
         }

@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.IO;
 using System.Net;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -37,10 +37,10 @@ namespace LyricsFinder.SourcePrivoder.Kugou
                     return default;
             }
 
-            JObject obj = JObject.Parse(content);
-            if ((int)obj["err_code"]!=0)
+            var obj = JsonDocument.Parse(content);
+            if ((obj.GetValue<int>("err_code"))!=0)
                 return null;
-            var raw_lyric = obj["data"]["lyrics"].ToString();
+            var raw_lyric = obj.GetValue<string>("data","lyrics");
             var lyrics = raw_lyric.Replace("\r\n", "\n");
 
             return lyrics;

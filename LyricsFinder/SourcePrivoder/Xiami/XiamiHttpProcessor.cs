@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using System.Text.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,10 +9,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace LyricsFinder.SourcePrivoder.Xiami
 {
-    public static class GlobalXiamiHttpProcessor
+    internal static class XiamiHttpProcessor
     { 
         private static Task updatingTask;
         private static string currentXmSgTk;
@@ -21,7 +22,7 @@ namespace LyricsFinder.SourcePrivoder.Xiami
 
         private static MD5 md5 = MD5.Create();
 
-        public static async ValueTask<JObject> ProcessRequestAsync(string apiPath, string paramQ = "", string apiBasePath = "https://www.xiami.com", CancellationToken cancellationToken = default, int retry = 5)
+        public static async ValueTask<JsonDocument> ProcessRequestAsync(string apiPath, string paramQ = "", string apiBasePath = "https://www.xiami.com", CancellationToken cancellationToken = default, int retry = 5)
         {
             if (retry == 0)
                 return default;
@@ -60,11 +61,9 @@ namespace LyricsFinder.SourcePrivoder.Xiami
 
             using var reader = new StreamReader(response.GetResponseStream());
             var content = await reader.CancelableReadToEndAsync(cancellationToken);
-            if (cancellationToken.IsCancellationRequested)
-                return default;
 
-            var json = JObject.Parse(content);
-            var code = json["code"].ToString().ToUpper();
+            var json = JsonDocument.Parse(content);
+            var code = (json.GetValue<string>("code"))?.ToUpper();
             if (code == "SUCCESS")
                 return json;
 

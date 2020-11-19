@@ -1,9 +1,10 @@
-﻿using Newtonsoft.Json.Linq;
+﻿
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,7 +35,7 @@ namespace LyricsFinder.SourcePrivoder.QQMusic
         /// 如果没有这个，一些歌的ID会下载到其他歌的歌词，比如 Ooi (Game edit)
         /// 获取歌词的时候的querystring是"songtype={type}"
         /// </summary>
-        public string type { get; set; }
+        public int type { get; set; }
 
         //建议qq音乐那边声明这个玩意的人跟我一起重学英语,谢谢
         /// <summary>
@@ -80,10 +81,8 @@ namespace LyricsFinder.SourcePrivoder.QQMusic
                     return default;
             }
 
-            var json = JObject.Parse(content);
-            var arr = json["data"]["song"]["list"];
-
-            var songs = (arr.ToObject<List<Song>>());
+            var json = JsonDocument.Parse(content);
+            var songs = json.GetValue<List<Song>>("data","song","list");
 
             return songs;
         }

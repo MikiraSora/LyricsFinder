@@ -49,6 +49,9 @@ namespace LyricsFinder
 
         public virtual async ValueTask<(Lyrics , SEARCHRESULT)> PickLyricAsync(string artist, string title, int time, List<SEARCHRESULT> search_result, bool request_trans_lyrics, CancellationToken cancel_token)
         {
+            if (search_result is null || search_result.Count == 0)
+                return default;
+
             DumpSearchList("-", time, search_result);
 
             FuckSearchFilte(artist, title, time, ref search_result);
@@ -126,6 +129,9 @@ namespace LyricsFinder
 
         public virtual void FuckSearchFilte(string artist, string title, int time, ref List<SEARCHRESULT> search_result)
         {
+            if (search_result is null || search_result.Count == 0)
+                return;
+
             //删除长度不对的
             search_result.RemoveAll((r) => Math.Abs(r.Duration-time) > GlobalSetting.DurationThresholdValue);
 

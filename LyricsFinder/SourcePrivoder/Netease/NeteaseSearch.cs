@@ -1,9 +1,10 @@
-﻿using Newtonsoft.Json.Linq;
+﻿
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using static LyricsFinder.SourcePrivoder.Netease.NeteaseSearch;
@@ -86,16 +87,16 @@ namespace LyricsFinder.SourcePrivoder.Netease
                     return default;
             }
 
-            JObject json = JObject.Parse(content);
+            var json = JsonDocument.Parse(content);
 
-            var count = json["result"]["songCount"]?.ToObject<int>();
+            var count = json.GetValue<int>("result", "songCount");
 
             if (count == 0)
             {
                 return new List<Song>();
             }
 
-            var result = json["result"]["songs"].ToObject<List<Song>>();
+            var result = json.GetValue<List<Song>>("result", "songs");
 
             return result;
         }
