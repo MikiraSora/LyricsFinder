@@ -57,10 +57,8 @@ namespace LyricsFinder.SourcePrivoder.Xiami
 
     public class XiamiSearcher : SongSearchBase<XiamiSearchResultSong>
     {
-        public override async Task<List<XiamiSearchResultSong>> SearchAsync(IEnumerable<string> param_arr, CancellationToken cancel_token = default)
+        public override async Task<List<XiamiSearchResultSong>> SearchAsync(string title, string artist, CancellationToken cancel_token = default)
         {
-            string title = param_arr.FirstOrDefault(), artist = param_arr.LastOrDefault();
-
             var paramQ = $"{{\"key\":\"{title} {artist}\",\"pagingVO\":{{\"page\":1,\"pageSize\":30}}}}";
 
             var json = await GlobalXiamiHttpProcessor.ProcessRequestAsync("/api/search/searchSongs", paramQ, cancellationToken: cancel_token);

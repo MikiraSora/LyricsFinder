@@ -31,9 +31,8 @@ namespace LyricsFinder.SourcePrivoder.Kugou
     {
         private static readonly string API_URL = @"http://mobilecdn.kugou.com/api/v3/search/song?format=json&keyword={1} {0}&page=1&pagesize=20&showtype=1";
 
-        public override async Task<List<KugouSearchResultSong>> SearchAsync(IEnumerable<string> param_arr,CancellationToken cancel_token)
+        public override async Task<List<KugouSearchResultSong>> SearchAsync(string title,string artist,CancellationToken cancel_token)
         {
-            string title = param_arr.FirstOrDefault(), artist = param_arr.LastOrDefault();
             Uri url = new Uri(string.Format(API_URL, artist, title));
 
             //这纸张酷狗有时候response不回来,但用浏览器就可以.先留校观察

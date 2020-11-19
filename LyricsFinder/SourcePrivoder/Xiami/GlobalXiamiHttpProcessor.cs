@@ -71,7 +71,7 @@ namespace LyricsFinder.SourcePrivoder.Xiami
             if (code == "SG_TOKEN_EXPIRED")
             {
                 //令牌过期 , 更新一下
-                Utils.Output("xiami response SG_TOKEN_EXPIRED");
+                Utils.Output("[xiami] response SG_TOKEN_EXPIRED");
                 await UpdateXmSgTk();
                 return await ProcessRequestAsync(apiPath, paramQ, apiBasePath, cancellationToken,retry--);
             }
@@ -92,7 +92,7 @@ namespace LyricsFinder.SourcePrivoder.Xiami
 
         private static async Task UpdateXmSgTk()
         {
-            Utils.Output("trying to get new XmSgTk for xiami provider...");
+            Utils.Output("[xiami] trying to get new XmSgTk for xiami provider...");
 
             var req = WebRequest.CreateHttp("https://www.xiami.com/");
             req.CookieContainer = cookieContainer;
@@ -104,7 +104,7 @@ namespace LyricsFinder.SourcePrivoder.Xiami
                 .FirstOrDefault()?.ToLowerInvariant();
 
             Debug.Assert(!string.IsNullOrWhiteSpace(currentXmSgTk), "currentXmSgTk is invaild after XmSgTk request.");
-            Utils.Output("currentXmSgTk : " + currentXmSgTk);
+            Utils.Output("[xiami] currentXmSgTk : " + currentXmSgTk);
 
             updatingTask = null;
         }

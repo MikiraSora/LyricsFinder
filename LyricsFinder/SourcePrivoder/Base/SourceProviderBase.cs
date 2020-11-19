@@ -27,7 +27,7 @@ namespace LyricsFinder
         {
             try
             {
-                var search_result = await Seadrcher.SearchAsync(new []{ artist, title }, cancel_token);
+                var search_result = await Seadrcher.SearchAsync(title, artist, cancel_token);
                 if (cancel_token.IsCancellationRequested)
                     return default;
 

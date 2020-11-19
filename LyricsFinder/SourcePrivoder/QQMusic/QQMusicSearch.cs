@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 namespace LyricsFinder.SourcePrivoder.QQMusic
 {
     #region JSON
+#pragma warning disable IDE1006 // 命名样式
 
     public struct Singer
     {
@@ -50,15 +51,15 @@ namespace LyricsFinder.SourcePrivoder.QQMusic
         }
     }
 
+#pragma warning restore IDE1006 // 命名样式
     #endregion JSON
 
     public class QQMusicSearch : SongSearchBase<Song>
     {
         private static readonly string API_URL = @"http://c.y.qq.com/soso/fcgi-bin/client_search_cp?ct=24&qqmusic_ver=1298&new_json=1&remoteplace=txt.yqq.song&t=0&aggr=1&cr=1&catZhida=1&lossless=0&flag_qc=0&p=1&n=20&w={0} {1}&g_tk=5381&hostUin=0&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0";
 
-        public override async Task<List<Song>> SearchAsync(IEnumerable<string> args, CancellationToken cancel_token)
+        public override async Task<List<Song>> SearchAsync(string title, string artist, CancellationToken cancel_token)
         {
-            string title = args.FirstOrDefault(), artist = args.LastOrDefault();
             Uri url = new Uri(string.Format(API_URL, artist, title));
 
             HttpWebRequest request = HttpWebRequest.CreateHttp(url);

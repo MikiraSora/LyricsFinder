@@ -10,6 +10,7 @@ using static LyricsFinder.SourcePrivoder.Netease.NeteaseSearch;
 
 namespace LyricsFinder.SourcePrivoder.Netease
 {
+#pragma warning disable IDE1006 // 命名样式
     public class NeteaseSearch : SongSearchBase<Song>
     {
         #region Search Result
@@ -54,14 +55,15 @@ namespace LyricsFinder.SourcePrivoder.Netease
             public override string Artist => artists?.First().name;
         }
 
+#pragma warning restore IDE1006 // 命名样式
+
         #endregion Search Result
 
         private static readonly string API_URL = "http://music.163.com/api/search/get/";
         private static readonly int SEARCH_LIMIT = 5;
 
-        public override async Task<List<Song>> SearchAsync(IEnumerable<string> param_arr,CancellationToken cancel_token)
+        public override async Task<List<Song>> SearchAsync(string title, string artist, CancellationToken cancel_token)
         {
-            string title = param_arr.FirstOrDefault(), artist = param_arr.LastOrDefault();
             Uri url = new Uri($"{API_URL}?s={artist} {title}&limit={SEARCH_LIMIT}&type=1&offset=0");
 
             HttpWebRequest request = HttpWebRequest.CreateHttp(url);
